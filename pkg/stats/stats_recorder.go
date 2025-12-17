@@ -4,6 +4,7 @@
 package stats
 
 import (
+	"slices"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -32,6 +33,7 @@ type internalStats struct {
 
 	inboundLastArrivalInitialized bool
 	inboundLastArrival            time.Time
+	inboundLastArrivalRTP         uint32
 	inboundLastTransit            int
 
 	remoteInboundFirstSequenceNumberInitialized bool
@@ -137,17 +139,21 @@ func (r *recorder) recordIncomingRTP(latestStats internalStats, incoming *incomi
 
 	if !latestStats.inboundLastArrivalInitialized {
 		latestStats.inboundLastArrival = incoming.ts
+		latestStats.inboundLastArrivalRTP = incoming.header.Timestamp
 		latestStats.inboundLastArrivalInitialized = true
 	} else {
-		arrival := int(incoming.ts.Sub(latestStats.inboundLastArrival).Seconds() * r.clockRate)
-		transit := arrival - int(incoming.header.Timestamp)
+		rtpUnitsSinceLastArrival := incoming.ts.Sub(latestStats.inboundLastArrival).Seconds() * r.clockRate
+		arrival := latestStats.inboundLastArrivalRTP + uint32(rtpUnitsSinceLastArrival)
+		transit := int(arrival) - int(incoming.header.Timestamp)
 		d := transit - latestStats.inboundLastTransit
-		latestStats.inboundLastTransit = transit
 		if d < 0 {
 			d = -d
 		}
-		latestStats.InboundRTPStreamStats.Jitter += (1.0 / 16.0) * (float64(d) - latestStats.InboundRTPStreamStats.Jitter)
+		dSec := float64(d) / r.clockRate
+		latestStats.inboundLastTransit = transit
+		latestStats.InboundRTPStreamStats.Jitter += (1.0 / 16.0) * (dSec - latestStats.InboundRTPStreamStats.Jitter)
 		latestStats.inboundLastArrival = incoming.ts
+		latestStats.inboundLastArrivalRTP = incoming.header.Timestamp
 	}
 
 	latestStats.LastPacketReceivedTimestamp = incoming.ts
@@ -244,7 +250,7 @@ func (r *recorder) recordIncomingRR(latestStats internalStats, pkt *rtcp.Receive
 		latestStats.RemoteInboundRTPStreamStats.Jitter = float64(report.Jitter) / r.clockRate
 
 		if report.Delay != 0 && report.LastSenderReport != 0 {
-			for i := minInt(r.maxLastSenderReports, len(latestStats.lastSenderReports)) - 1; i >= 0; i-- {
+			for i := min(r.maxLastSenderReports, len(latestStats.lastSenderReports)) - 1; i >= 0; i-- {
 				lastReport := latestStats.lastSenderReports[i]
 				if (lastReport&0x0000FFFFFFFF0000)>>16 == uint64(report.LastSenderReport) {
 					dlsr := time.Duration(float64(report.Delay) / 65536.0 * float64(time.Second))
@@ -267,7 +273,7 @@ func (r *recorder) recordIncomingXR(latestStats internalStats, pkt *rtcp.Extende
 		if xr, ok := report.(*rtcp.DLRRReportBlock); ok {
 			for _, xrReport := range xr.Reports {
 				if xrReport.LastRR != 0 && xrReport.DLRR != 0 {
-					for i := minInt(r.maxLastReceiverReferenceTimes, len(latestStats.lastReceiverReferenceTimes)) - 1; i >= 0; i-- {
+					for i := min(r.maxLastReceiverReferenceTimes, len(latestStats.lastReceiverReferenceTimes)) - 1; i >= 0; i-- {
 						lastRR := latestStats.lastReceiverReferenceTimes[i]
 						if (lastRR&0x0000FFFFFFFF0000)>>16 == uint64(xrReport.LastRR) {
 							dlrr := time.Duration(float64(xrReport.DLRR) / 65536.0 * float64(time.Second))
@@ -286,13 +292,7 @@ func (r *recorder) recordIncomingXR(latestStats internalStats, pkt *rtcp.Extende
 }
 
 func contains(ls []uint32, e uint32) bool {
-	for _, x := range ls {
-		if x == e {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(ls, e)
 }
 
 func (r *recorder) recordIncomingRTCP(latestStats internalStats, incoming *incomingRTCP) internalStats {
@@ -401,12 +401,4 @@ func (r *recorder) QueueOutgoingRTCP(ts time.Time, pkts []rtcp.Packet, attr inte
 		attr: attr,
 	})
 	r.ms.Unlock()
-}
-
-func minInt(a, b int) int {
-	if a < b {
-		return a
-	}
-
-	return b
 }
