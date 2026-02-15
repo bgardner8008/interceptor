@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 The Pion community <https://pion.ly>
+// SPDX-FileCopyrightText: 2026 The Pion community <https://pion.ly>
 // SPDX-License-Identifier: MIT
 
 package report
@@ -21,7 +21,7 @@ func TestSenderInterceptor(t *testing.T) {
 		mt := &test.MockTime{}
 		f, err := NewSenderInterceptor(
 			SenderInterval(time.Millisecond*50),
-			SenderLog(logging.NewDefaultLoggerFactory().NewLogger("test")),
+			WithSenderLoggerFactory(logging.NewDefaultLoggerFactory()),
 			SenderNow(mt.Now),
 		)
 		assert.NoError(t, err)

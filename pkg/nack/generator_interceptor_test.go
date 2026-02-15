@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 The Pion community <https://pion.ly>
+// SPDX-FileCopyrightText: 2026 The Pion community <https://pion.ly>
 // SPDX-License-Identifier: MIT
 
 package nack
@@ -22,7 +22,7 @@ func TestGeneratorInterceptor(t *testing.T) {
 		GeneratorSkipLastN(2),
 		GeneratorMaxNacksPerPacket(10),
 		GeneratorInterval(interval),
-		GeneratorLog(logging.NewDefaultLoggerFactory().NewLogger("test")),
+		WithGeneratorLoggerFactory(logging.NewDefaultLoggerFactory()),
 	)
 	assert.NoError(t, err)
 

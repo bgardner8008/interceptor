@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 The Pion community <https://pion.ly>
+// SPDX-FileCopyrightText: 2026 The Pion community <https://pion.ly>
 // SPDX-License-Identifier: MIT
 
 package packetdump
@@ -21,8 +21,17 @@ func Log(log logging.LeveledLogger) PacketDumperOption {
 	}
 }
 
+// WithLoggerFactory sets a logger factory for the interceptor.
+func WithLoggerFactory(loggerFactory logging.LoggerFactory) PacketDumperOption {
+	return func(d *PacketDumper) error {
+		d.loggerFactory = loggerFactory
+
+		return nil
+	}
+}
+
 // PacketLog sets the packet logger of a packet dumper. Use this to replace the
-// default logger with yout own logger implementation.
+// default logger with your own logger implementation.
 func PacketLog(logger PacketLogger) PacketDumperOption {
 	return func(d *PacketDumper) error {
 		d.packetLogger = logger
@@ -52,6 +61,7 @@ func RTCPWriter(w io.Writer) PacketDumperOption {
 }
 
 // RTPFormatter sets the RTP format used by the default packet logger.
+//
 // Deprecated: prefer RTPBinaryFormatter.
 func RTPFormatter(f RTPFormatCallback) PacketDumperOption {
 	return func(d *PacketDumper) error {
@@ -62,6 +72,7 @@ func RTPFormatter(f RTPFormatCallback) PacketDumperOption {
 }
 
 // RTCPFormatter sets the RTCP format used by the default packet logger.
+//
 // Deprecated: prefer RTCPBinaryFormatter.
 func RTCPFormatter(f RTCPFormatCallback) PacketDumperOption {
 	return func(d *PacketDumper) error {
@@ -101,6 +112,7 @@ func RTPFilter(callback RTPFilterCallback) PacketDumperOption {
 }
 
 // RTCPFilter sets the RTCP filter used by the default packet logger.
+//
 // Deprecated: prefer RTCPPerPacketFilter.
 func RTCPFilter(callback RTCPFilterCallback) PacketDumperOption {
 	return func(d *PacketDumper) error {

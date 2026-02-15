@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 The Pion community <https://pion.ly>
+// SPDX-FileCopyrightText: 2026 The Pion community <https://pion.ly>
 // SPDX-License-Identifier: MIT
 
 package pacing
@@ -10,6 +10,7 @@ import (
 
 	"github.com/pion/interceptor"
 	"github.com/pion/interceptor/internal/test"
+	"github.com/pion/logging"
 	"github.com/pion/rtp"
 	"github.com/stretchr/testify/assert"
 )
@@ -61,6 +62,7 @@ func TestInterceptor(t *testing.T) {
 			setPacerFactory(func(initialRate, burst int) pacer {
 				return mp
 			}),
+			WithLoggerFactory(logging.NewDefaultLoggerFactory()),
 		)
 
 		_, err := i.NewInterceptor("")

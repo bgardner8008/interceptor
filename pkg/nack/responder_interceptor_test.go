@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 The Pion community <https://pion.ly>
+// SPDX-FileCopyrightText: 2026 The Pion community <https://pion.ly>
 // SPDX-License-Identifier: MIT
 
 package nack
@@ -28,7 +28,7 @@ func TestResponderInterceptor(t *testing.T) {
 			name: "with copy",
 			opts: []ResponderOption{
 				ResponderSize(8),
-				ResponderLog(logging.NewDefaultLoggerFactory().NewLogger("test")),
+				WithResponderLoggerFactory(logging.NewDefaultLoggerFactory()),
 			},
 		},
 		{

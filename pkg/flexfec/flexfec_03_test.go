@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 The Pion community <https://pion.ly>
+// SPDX-FileCopyrightText: 2026 The Pion community <https://pion.ly>
 // SPDX-License-Identifier: MIT
 
 package flexfec
@@ -6,6 +6,7 @@ package flexfec
 import (
 	"testing"
 
+	"github.com/pion/logging"
 	"github.com/pion/rtp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -21,7 +22,7 @@ func checkAnyPacketCanBeRecovered(t *testing.T, mediaPackets []rtp.Packet, fecPa
 	t.Helper()
 
 	for lost := 0; lost < len(mediaPackets); lost++ {
-		decoder := newFECDecoder(ssrc, protectedStreamSSRC)
+		decoder := newFECDecoder(ssrc, protectedStreamSSRC, logging.NewDefaultLoggerFactory())
 		recoveredPackets := make([]rtp.Packet, 0)
 		// lose one packet
 		for _, mediaPacket := range mediaPackets[:lost] {

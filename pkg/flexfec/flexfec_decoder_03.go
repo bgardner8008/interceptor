@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 The Pion community <https://pion.ly>
+// SPDX-FileCopyrightText: 2026 The Pion community <https://pion.ly>
 // SPDX-License-Identifier: MIT
 
 // Package flexfec implements FlexFEC-03 to recover missing RTP packets due to packet loss.
@@ -35,9 +35,9 @@ type fecDecoder struct {
 	receivedFECPackets  []fecPacketState
 }
 
-func newFECDecoder(ssrc uint32, protectedStreamSSRC uint32) *fecDecoder {
+func newFECDecoder(ssrc uint32, protectedStreamSSRC uint32, loggerFactory logging.LoggerFactory) *fecDecoder {
 	return &fecDecoder{
-		logger:              logging.NewDefaultLoggerFactory().NewLogger("fec_decoder"),
+		logger:              loggerFactory.NewLogger("fec_decoder"),
 		ssrc:                ssrc,
 		protectedStreamSSRC: protectedStreamSSRC,
 		maxMediaPackets:     100,

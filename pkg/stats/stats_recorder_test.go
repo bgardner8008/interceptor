@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 The Pion community <https://pion.ly>
+// SPDX-FileCopyrightText: 2026 The Pion community <https://pion.ly>
 // SPDX-License-Identifier: MIT
 
 package stats
@@ -12,6 +12,7 @@ import (
 
 	"github.com/pion/interceptor"
 	"github.com/pion/interceptor/internal/ntp"
+	"github.com/pion/logging"
 	"github.com/pion/rtcp"
 	"github.com/pion/rtp"
 	"github.com/stretchr/testify/assert"
@@ -928,7 +929,7 @@ func TestStatsRecorder(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("%v:%v", i, cc.name), func(t *testing.T) {
-			recorder := newRecorder(0, 90_000)
+			recorder := newRecorder(0, 90_000, logging.NewDefaultLoggerFactory())
 
 			recorder.Start()
 
@@ -962,7 +963,7 @@ func TestStatsRecorder(t *testing.T) {
 }
 
 func TestStatsRecorder_DLRR_Precision(t *testing.T) {
-	recorder := newRecorder(0, 90_000)
+	recorder := newRecorder(0, 90_000, logging.NewDefaultLoggerFactory())
 
 	report := &rtcp.ExtendedReport{
 		Reports: []rtcp.ReportBlock{
@@ -986,7 +987,7 @@ func TestStatsRecorder_DLRR_Precision(t *testing.T) {
 }
 
 func TestGetStatsNotBlocking(t *testing.T) {
-	r := newRecorder(0, 90_000)
+	r := newRecorder(0, 90_000, logging.NewDefaultLoggerFactory())
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -1034,7 +1035,7 @@ func TestQueueNotBlocking(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.name+"NotBlocking", func(t *testing.T) {
-			r := newRecorder(0, 90_000)
+			r := newRecorder(0, 90_000, logging.NewDefaultLoggerFactory())
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()

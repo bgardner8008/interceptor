@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 The Pion community <https://pion.ly>
+// SPDX-FileCopyrightText: 2026 The Pion community <https://pion.ly>
 // SPDX-License-Identifier: MIT
 
 package rfc8888
@@ -9,6 +9,7 @@ import (
 
 	"github.com/pion/interceptor"
 	"github.com/pion/interceptor/internal/test"
+	"github.com/pion/logging"
 	"github.com/pion/rtcp"
 	"github.com/pion/rtp"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,7 @@ import (
 //nolint:maintidx,cyclop
 func TestInterceptor(t *testing.T) {
 	t.Run("before any packet", func(t *testing.T) {
-		f, err := NewSenderInterceptor()
+		f, err := NewSenderInterceptor(WithLoggerFactory(logging.NewDefaultLoggerFactory()))
 		assert.NoError(t, err)
 
 		i, err := f.NewInterceptor("")

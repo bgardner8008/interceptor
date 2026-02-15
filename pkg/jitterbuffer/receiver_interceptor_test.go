@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 The Pion community <https://pion.ly>
+// SPDX-FileCopyrightText: 2026 The Pion community <https://pion.ly>
 // SPDX-License-Identifier: MIT
 
 package jitterbuffer
@@ -20,7 +20,7 @@ func TestBufferStart(t *testing.T) {
 	buf := bytes.Buffer{}
 
 	factory, err := NewInterceptor(
-		Log(logging.NewDefaultLoggerFactory().NewLogger("test")),
+		WithLoggerFactory(logging.NewDefaultLoggerFactory()),
 	)
 	assert.NoError(t, err)
 
